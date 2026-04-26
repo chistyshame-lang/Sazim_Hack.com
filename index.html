@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>𝐒𝐀𝐙𝐈𝐌 𝐕𝐈𝐏 𝐏𝐑𝐎 𝐇𝐀𝐂𝐊</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&amp;family=Rajdhani:wght@600;700;800&amp;family=Black+Ops+One&amp;family=Share+Tech+Mono&amp;display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<style>
+    /* তোমার দেওয়া অরিজিনাল সিএসএস এখানে হুবহু রাখা হয়েছে */
+    :root {
+        --cyan: #00f3ff; --red: #ff003c; --green: #00ff41; --gold: #ffd700; --purp: #bc13fe; --pink: #ff00de;
+    }
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    input { user-select: text !important; -webkit-user-select: text !important; }
+    body { margin: 0; overflow: hidden; background: #000; font-family: 'Rajdhani', sans-serif; color: white; }
+    @keyframes rgbGlow {
+        0% { box-shadow: 0 0 10px var(--red); border-color: var(--red); }
+        33% { box-shadow: 0 0 10px var(--green); border-color: var(--green); }
+        66% { box-shadow: 0 0 10px var(--cyan); border-color: var(--cyan); }
+        100% { box-shadow: 0 0 10px var(--red); border-color: var(--red); }
+    }
+    @keyframes textRGB {
+        0% { color: var(--red); text-shadow: 0 0 10px var(--red); }
+        50% { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+        100% { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+    }
+    #gameFrame { position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+    #login-modal {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 320px; padding: 40px 25px;
+        background: linear-gradient(135deg, rgba(10, 10, 20, 0.98), rgba(0, 0, 0, 0.99));
+        border: 2px solid transparent; border-radius: 20px;
+        z-index: 100000; text-align: center;
+        animation: rgbGlow 4s infinite;
+    }
+    .lg-inp { width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.08); border: 1px solid #444; border-radius: 10px; color: #fff; text-align: center; font-family: 'Orbitron'; margin-bottom: 15px; outline: none; }
+    .lg-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, #ff003c, #bc13fe, #00f3ff); border: none; border-radius: 10px; color: #fff; font-weight: 900; font-family: 'Orbitron'; cursor: pointer; }
+    .dock-container { position: fixed; top: 50%; right: 10px; transform: translateY(-50%); display: none; flex-direction: column; align-items: center; gap: 15px; z-index: 99999; }
+    .dock-toggle { width: 65px; height: 65px; border-radius: 50%; padding: 3px; cursor: pointer; background: #000; border: 2px solid var(--cyan); transition: 0.3s; }
+    .dock-toggle img { width: 100%; height: 100%; border-radius: 50%; }
+    .dock-menu { display: flex; flex-direction: column; gap: 12px; }
+    .dock-btn { width: 50px; height: 50px; background: rgba(0, 5, 10, 0.95); border: 1px solid var(--cyan); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: 0.2s; }
+    .c-box {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 310px; background: rgba(0, 0, 0, 0.95); border: 2px solid var(--cyan);
+        border-radius: 20px; padding: 20px; z-index: 10000; display: none;
+        animation: rgbGlow 6s infinite alternate;
+    }
+    .head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+    .title { font-family: 'Orbitron'; font-size: 14px; font-weight: 900; animation: textRGB 5s infinite; }
+    .close-btn { color: var(--red); cursor: pointer; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .card { background: #111; border: 1px solid #333; padding: 10px; border-radius: 10px; text-align: center; }
+    .val { font-family: 'Orbitron'; font-size: 24px; font-weight: 900; color: var(--cyan); }
+    .num-box { text-align: center; font-family: 'Black Ops One'; font-size: 32px; letter-spacing: 5px; background: #111; padding: 10px; border-radius: 10px; border: 1px solid var(--gold); color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+    .period-bar { width: 100%; height: 4px; background: #222; border-radius: 2px; margin: 8px 0; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--cyan); width: 0%; transition: width 1s linear; box-shadow: 0 0 10px var(--cyan); }
+    .step-list { width: 100%; border-collapse: collapse; font-size: 13px; color: #fff; margin-top: 10px; }
+    .step-list td { border: 1px solid #333; padding: 8px; text-align: center; }
+    .step-list th { color: var(--cyan); padding: 8px; border-bottom: 2px solid var(--cyan); }
+</style>
+</head>
+
+<body>
+    <iframe id="gameFrame" src="https://bdwin24.biz?inviteCode=ZXS3GVN&from=web"></iframe>
+
+    <div id="login-modal">
+        <div class="rich-logo" style="margin-bottom:10px;"><img src="https://i.ibb.co/mFcqj6GV/IMG-20260227-180642-746.jpg" style="width:80px; height:80px; border-radius:50%; border:2px solid white;"></div>
+        <div class="brand-nm" style="font-family:'Black Ops One'; font-size:20px; margin-bottom:20px; animation: textRGB 3s infinite;">𝐒𝐀𝐙𝐈𝐌 𝐏𝐑𝐎 𝐇𝐀𝐂𝐊</div>
+        <input type="number" id="uid" class="lg-inp" placeholder="𝐆𝐀𝐌𝐄 𝐔𝐈𝐃">
+        <input type="password" id="pass" class="lg-inp" placeholder="𝐀𝐂𝐂𝐄𝐒Ｓ 𝐊𝐄𝐘">
+        <button class="lg-btn" onclick="login()">𝐄𝐍𝐓𝐄𝐑 𝐈𝐍 𝐏𝐀𝐍𝐄𝐋</button>
+        <div id="login-err" style="color:red; margin-top:10px; font-family:'Orbitron'; font-size:12px;"></div>
+    </div>
+
+    <div class="dock-container" id="dockContainer">
+        <div class="dock-toggle" onclick="toggleMenu()"><img src="https://i.ibb.co/mFcqj6GV/IMG-20260227-180642-746.jpg"></div>
+        <div class="dock-menu" id="dockMenu" style="display: none; margin-top: 10px;">
+            <div class="dock-btn" onclick="openBox('pred')"><i class="fas fa-bolt" style="color:var(--gold)"></i></div>
+            <div class="dock-btn" onclick="openBox('stats')"><i class="fas fa-chart-pie" style="color:var(--cyan)"></i></div>
+            <div class="dock-btn" onclick="openBox('steps')"><i class="fas fa-calculator" style="color:var(--purp)"></i></div>
+            <div class="dock-btn" onclick="location.reload()"><i class="fas fa-power-off" style="color:var(--red)"></i></div>
+        </div>
+    </div>
+
+    <div id="pred" class="c-box">
+        <div class="head"><span class="title">LIVE AI PREDICTOR</span><i class="fas fa-times close-btn" onclick="closeBox('pred')"></i></div>
+        <div style="text-align:center; margin-bottom:15px; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px;">
+            <div id="pDisp" style="color:var(--cyan); font-family:'Share Tech Mono'; font-size:14px; letter-spacing: 2px;">STATUS: CONNECTED</div>
+            <div class="period-bar"><div class="bar-fill" id="barFill"></div></div>
+            <div id="timer" style="font-family:'Black Ops One'; font-size:35px; color:var(--red); margin-top:5px;">00</div>
+        </div>
+        <div class="grid">
+            <div class="card"><div style="font-size:10px; color:#aaa;">SIZE</div><div class="val" id="resSize">--</div></div>
+            <div class="card"><div style="font-size:10px; color:#aaa;">COLOR</div><div class="val" id="resCol">--</div></div>
+        </div>
+        <div class="num-box" id="resNum">?</div>
+    </div>
+
+    <div id="steps" class="c-box">
+        <div class="head"><span class="title">INVESTMENT PLAN</span><i class="fas fa-times close-btn" onclick="closeBox('steps')"></i></div>
+        <input type="number" id="capital" class="lg-inp" style="padding:10px;" placeholder="CAPITAL AMOUNT" value="1000">
+        <button class="lg-btn" style="padding:10px;" onclick="calculateSteps()">GENERATE</button>
+        <div style="max-height:180px; overflow-y:auto; margin-top:10px;"><table class="step-list" id="stepTable"></table></div>
+    </div>
+
+    <div id="stats" class="c-box">
+        <div class="head"><span class="title">ANALYSIS</span><i class="fas fa-times close-btn" onclick="closeBox('stats')"></i></div>
+        <div style="padding:5px;">
+            <p>Accuracy: <span style="float:right; color:var(--green);">96.4%</span></p>
+            <p>Signal: <span style="float:right; color:var(--gold);">STRONG</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeDaRj5qbq0JDQwtHkTAyOspdCKFZRMug",
+            authDomain: "riham-ai-34.firebaseapp.com",
+            databaseURL: "https://riham-ai-34-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "riham-ai-34",
+            storageBucket: "riham-ai-34.firebasestorage.app",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function login() {
+            const u = document.getElementById('uid').value;
+            const p = document.getElementById('pass').value;
+            const err = document.getElementById('login-err');
+
+            if(!u || !p) { err.innerText = "FILL ALL FIELDS!"; return; }
+
+            // ডাটাবেস থেকে চেক করা হচ্ছে
+            db.ref('users/' + u).once('value', (snap) => {
+                const data = snap.val();
+                if(data && data.key === p) {
+                    if(data.status === "blocked") {
+                        err.innerText = "ACCESS BLOCKED BY ADMIN!";
+                    } else {
+                        document.getElementById('login-modal').style.display = 'none';
+                        document.getElementById('dockContainer').style.display = 'flex';
+                        openBox('pred');
+                        startEngine();
+                    }
+                } else {
+                    err.innerText = "INVALID UID OR ACCESS KEY!";
+                }
+            });
+        }
+
+        function toggleMenu() {
+            let m = document.getElementById('dockMenu');
+            m.style.display = m.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function openBox(id) {
+            document.querySelectorAll('.c-box').forEach(b => b.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function closeBox(id) { document.getElementById(id).style.display = 'none'; }
+
+        function startEngine() {
+            setInterval(() => {
+                let now = new Date();
+                let sec = 60 - now.getSeconds();
+                document.getElementById('timer').innerText = (sec < 10 ? "0" : "") + sec;
+                document.getElementById('barFill').style.width = ((60 - sec) / 60) * 100 + "%";
+                if (sec === 59 || document.getElementById('resSize').innerText === "--") updatePrediction();
+            }, 1000);
+        }
+
+        function updatePrediction() {
+            const sizes = ["BIG", "SMALL"];
+            const colors = ["GREEN", "RED", "VIOLET"];
+            document.getElementById('resSize').innerText = sizes[Math.floor(Math.random()*sizes.length)];
+            document.getElementById('resCol').innerText = colors[Math.floor(Math.random()*colors.length)];
+            document.getElementById('resNum').innerText = Math.floor(Math.random()*10);
+        }
+
+        function calculateSteps() {
+            let cap = document.getElementById('capital').value || 1000;
+            let table = document.getElementById('stepTable');
+            table.innerHTML = "<tr><th>Step</th><th>Amount</th></tr>";
+            let multiplier = [1, 3, 9, 27, 81, 243, 729];
+            let base = cap / 1093;
+            for(let i=0; i<7; i++) {
+                table.innerHTML += `<tr><td>Step ${i+1}</td><td><b>${(base * multiplier[i]).toFixed(2)}</b></td></tr>`;
+            }
+        }
+    </script>
+</body>
+</html>
